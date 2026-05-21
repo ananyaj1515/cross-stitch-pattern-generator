@@ -83,14 +83,17 @@ def create_pattern_grid(labels, image_shape, dmc_matches):
 
 def stitch_counts(labels, dmc_matches):
     unique, counts = np.unique(labels, return_counts=True)
-    dmc_matches['stitch_count'] = counts
+    count_map = dict(zip(unique, counts))
+    dmc_matches['stitch_count'] = dmc_matches.index.map(lambda i: count_map.get(i, 0))
+    dmc_matches['bundle_count'] =  round(dmc_matches['stitch_count'] / 200) + 1
+    print(dmc_matches)
     return dmc_matches
 
 
 # final pipeline
 def complete_pipeline(path, max_dim=50, n_colors = 15):
     # calling all helper functions
-    img = Image.open(path)
+    img = Image.open(path).convert("RGB")
     new_image = resizeImage(img, calculateDimensions(img.size[0], img.size[1], max_dim))
     pixels = np.array(new_image)
 

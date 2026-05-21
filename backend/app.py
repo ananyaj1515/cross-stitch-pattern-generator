@@ -5,7 +5,7 @@ import os
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
+CORS(app)
 
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -40,7 +40,3 @@ def process_image():
     
     except Exception as e:
         return jsonify({'error' : str(e)}), 500
-
-
-if __name__== "__main__":
-    app.run(debug=True, port=5000)
