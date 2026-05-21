@@ -25,7 +25,7 @@ function App() {
     formData.append('n_colors', nColors)
 
     try {
-      const response = await fetch('http://127.0.0.1:5000/process', {
+      const response = await fetch('https://cross-stitch-pattern-generator-production.up.railway.app/process', {
         method: 'POST',
         body: formData
       })

@@ -1,23 +1,20 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from ImageProcessing import complete_pipeline
+
 import os
 from werkzeug.utils import secure_filename
-
+print("APP STARTING")
 app = Flask(__name__)
 CORS(app)
+
 
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-
-@app.route('/test', methods=['GET'])
-def test():
-    return jsonify({'message': 'Main app is running!'})
-
 @app.route('/process', methods=['POST'])
 def process_image():
+    from ImageProcessing import complete_pipeline
     print("Request received!")
     try:
         print("Getting file...")
