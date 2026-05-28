@@ -1,70 +1,86 @@
-# Getting Started with Create React App
+# Cross-Stitch Pattern Generator
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A web app that turns a user-uploaded image into a cross-stitch reference pattern. Users can upload an image, choose a canvas/grid size, and set the number of colours to use. The app quantizes the image, matches the resulting palette to DMC thread colours, and displays a stitch-style pattern together with the DMC thread key.
 
-## Available Scripts
+## What it does
 
-In the project directory, you can run:
+- Accepts an image upload from the user.
+- Lets the user control the output size with a canvas/grid parameter.
+- Uses the chosen number of colours as a clustering hyperparameter.
+- Runs k-means clustering on the resized image colours.
+- Maps clustered colours to DMC thread colours using the `backend/dmc.csv` database.
+- Returns the generated stitch grid plus DMC colour information so the user can recreate the design.
 
-### `npm start`
+## Project structure
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- `cross-stitch-generator/` — React front-end interface.
+  - Upload image, choose grid size, choose number of colours.
+  - Sends the image and parameters to the backend API.
+  - Visualizes the generated stitch pattern.
+- `backend/` — Flask API and image processing pipeline.
+  - Resizes the image.
+  - Runs k-means clustering.
+  - Matches cluster colours to DMC entries in `dmc.csv`.
+  - Returns the stitch grid and thread key.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## How the processing works
 
-### `npm test`
+1. The user uploads an image and selects a maximum grid size and number of colour clusters.
+2. The backend resizes the image to the requested scale.
+3. K-means clustering reduces the image to the requested number of representative colours.
+4. Each cluster colour is matched against the DMC colour table to find the closest thread code and name.
+5. The final stitched pattern and DMC reference key are returned to the UI.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Tech stack
 
-### `npm run build`
+- Frontend: React + React Scripts
+- Backend: Flask, NumPy, scikit-learn, Pillow, pandas
+- Colour matching: DMC thread database stored in `backend/dmc.csv`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Local development
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Frontend
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+From the `cross-stitch-generator/` directory:
 
-### `npm run eject`
+```bash
+npm install
+npm start
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+The React app opens locally and lets you upload an image and generate a pattern.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Backend
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+From the `backend/` directory:
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```bash
+pip install -r requirements.txt
+python wsgi.py
+```
 
-## Learn More
+The Flask API serves the image processing endpoint used by the frontend.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## API usage
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+The frontend posts the uploaded image and two parameters to the backend:
 
-### Code Splitting
+- `max_dim` — the resized canvas/grid size
+- `n_colors` — the number of cluster colours for quantization
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+The backend returns:
 
-### Analyzing the Bundle Size
+- `pattern_grid` — a grid of DMC thread codes representing the stitch layout
+- `key` — mapped thread names, RGB values, and stitch counts
+- `dimensions` — the generated pattern dimensions
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## Notes
 
-### Making a Progressive Web App
+- The DMC matching database is stored in `backend/dmc.csv`.
+- The current React app is configured to point at the hosted backend URL in `src/App.js`. If running locally, update the API endpoint to point to your local Flask server.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## Future improvements
 
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- Add downloadable pattern exports.
+- Improve colour handling and preview rendering.
+- Support alternative thread palettes and higher-resolution pattern generation.

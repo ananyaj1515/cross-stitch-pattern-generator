@@ -5,6 +5,7 @@ import { useState } from 'react';
 
 function App() {
 
+  const API_URL = "https://cross-stitch-pattern-generator-production.up.railway.app"
   const [image, setImage] = useState(null)
   const [maxDim, setMaxDim] = useState(50)
   const [nColors, setNColors] = useState(15)
@@ -25,7 +26,7 @@ function App() {
     formData.append('n_colors', nColors)
 
     try {
-      const response = await fetch('https://cross-stitch-pattern-generator-production.up.railway.app/process', {
+      const response = await fetch(`${API_URL}/process`, {
         method: 'POST',
         body: formData
       })
